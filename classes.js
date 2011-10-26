@@ -130,9 +130,6 @@ function CanvasManager() {
 
 };
 
-/**
- * @return CanvasRenderingContext2D
- */
 CanvasManager.prototype.getContext = function() {
     return this.canvas.getContext("2d");     
 };
@@ -150,11 +147,9 @@ CanvasManager.prototype.moveObject = function (o, x, y) {
   o.draw(this.getContext());
 };
 
-
 CanvasManager.prototype.moveByVector = function (o) {     
   this.moveObject(o, o.getVector().getX(), o.getVector().getY());
 };
-
 
 CanvasManager.prototype.getWidth = function () {
     return this.canvas.getAttribute('width');
@@ -344,7 +339,7 @@ Matrix.prototype.get = function(row, col) {
 
 function Computer (balls, handle, canvas) {
     this.handle = handle;
-    this.acitve = false;
+    this.acitve = true;
     this.balls = balls;
     this.canvas = canvas;
 };
@@ -361,7 +356,7 @@ Computer.prototype.getRelevantObject = function() {
 };
 
 Computer.prototype.act = function () {
-    if (this.acitve === false) {
+    if (this.acitve === true) {
         var ball = this.getRelevantObject();
         if (ball.getY()+ball.getHeight()/2 < this.handle.getY()+this.handle.getHeight()/2){
             this.canvas.moveObject(this.handle, 0, -7);
@@ -373,11 +368,11 @@ Computer.prototype.act = function () {
 };
 
 Computer.prototype.disable = function () {
-    this.acitve = true;
+    this.acitve = false;
 };
 
 Computer.prototype.enable = function () {
-    this.acitve = false;
+    this.acitve = true;
 };
 
 /***************************************************

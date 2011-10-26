@@ -25,7 +25,7 @@ function onLoad() {
     segment = segment > 100 ? 100 : segment; 
     
     app = new Application(document.getElementById('canvas'),segment);
-    setInterval(iteration,15);  
+    setInterval(iteration,10);
     
     document.onkeydown = keyDown;
     document.onkeyup = keyUp;     
@@ -49,6 +49,7 @@ function keyUp(e){
 
 function Application(canvas, balls) {
     this.bootstrap(canvas, balls);
+    this.version = "0.3";
 }
 
 Application.prototype.bootstrap = function (canvas, balls) {
@@ -85,7 +86,7 @@ Application.prototype.bootstrap = function (canvas, balls) {
     this.spawnBalls();
       
     
-}
+};
 
 Application.prototype.populate = function (balls) {
     
@@ -98,12 +99,13 @@ Application.prototype.populate = function (balls) {
 };
 
 Application.prototype.iterate = function () {
-    //console.log(this);
     this.iter++;
     this.animate();
     if (this.iter % 2 === 0) {
         forEach(this.computers, function(item){item.act()});
     }
+
+
 };
 
 Application.prototype.animate = function() {
@@ -125,7 +127,26 @@ Application.prototype.animate = function() {
             this.spawnBall(this.balls[i]);     
         }   
     }  
-    
+
+   if (this.computerLeft.acitve === false) {
+       var speed = this.leftPaddle.getVector().getY();
+       var step = 3;
+       if (this.leftPaddle.getY() + this.leftPaddle.getHeight() >= this.canvas.getHeight()&& speed > 0) { speed = 0; }
+       if (this.leftPaddle.getY() <= 0 && speed < 0) { speed = 0; }
+       this.leftPaddle.getVector().setY(Math.abs(speed) > step ? speed > 0 ? speed-step : speed+step : 0);
+       this.canvas.moveByVector(this.leftPaddle);
+   }
+
+    if (this.computerRight.acitve === false) {
+        var speed = this.rightPaddle.getVector().getY();
+        var step = 3;
+        if (this.rightPaddle.getY() + this.rightPaddle.getHeight() >= this.canvas.getHeight()&& speed > 0) { speed = 0; }
+        if (this.rightPaddle.getY() <= 0 && speed < 0) { speed = 0; }
+        this.rightPaddle.getVector().setY(Math.abs(speed) > step ? speed > 0 ? speed-step : speed+step : 0);
+        this.canvas.moveByVector(this.rightPaddle);
+    }
+
+
     // score    
     this.canvas.clearRectangle(this.canvas.getWidth()/2-50,0,100, 20);    
     this.canvas.getContext().font = "16pt Calibri";
@@ -134,7 +155,7 @@ Application.prototype.animate = function() {
     this.canvas.getContext().fillText(this.score.getA() + " : " + this.score.getB(), this.canvas.getWidth()/2, 20);
     this.canvas.getContext().font = "8pt Calibri";
     this.canvas.clearRectangle(this.canvas.getWidth()-27,this.canvas.getHeight()-15,30, 30);
-    this.canvas.getContext().fillText("v 0.2", this.canvas.getWidth()-15, this.canvas.getHeight()-5);
+    this.canvas.getContext().fillText("v " + this.version, this.canvas.getWidth()-15, this.canvas.getHeight()-5);
 
     
     this.canvas.detectCollision();
@@ -145,7 +166,6 @@ Application.prototype.spawnBalls = function() {
     this.canvas.clear();
     this.rightPaddle.draw(this.canvas.getContext());
     this.leftPaddle.draw(this.canvas.getContext());
-    //forEach( this.balls, this.spawnBall);
     for (var i =0; i<this.balls.length; i++) {
       this.spawnBall(this.balls[i]);
     }    
@@ -156,7 +176,7 @@ Application.prototype.spawnBall = function(ball) {
     ball.setY(this.canvas.getHeight()/2);
     ball.setHeight(16);
     ball.setWidth(16);
-    ball.setVector(Vector.getRandom(2,3));
+    ball.setVector(Vector.getRandom(2,2));
 };
 
 Application.prototype.keyDown = function(event) {
@@ -168,24 +188,32 @@ Application.prototype.keyDown = function(event) {
     t = event.keyCode;
   }
 
-  if ( t === 87 && this.leftPaddle.getY() > 0 ) {
+  // right up
+  if (t === 87) {
       this.computerLeft.disable();
-      this.canvas.moveObject(this.leftPaddle, 0, -30);
+      var speed = this.leftPaddle.getVector().getY();
+      this.leftPaddle.getVector().setY(speed > -20 ? speed - 20 : speed);
   }
-   
-  if ( t === 83 && this.leftPaddle.getY() + this.leftPaddle.getHeight() < this.canvas.getHeight()) {
+
+  // left down
+  if (t === 83) {
       this.computerLeft.disable();
-      this.canvas.moveObject(this.leftPaddle, 0, +30);
+      var speed = this.leftPaddle.getVector().getY();
+      this.leftPaddle.getVector().setY(speed < 20 ? speed + 20 : speed);
   }  
 
-  if ( t === 38 && this.rightPaddle.getY() > 0 ) {
+  // right down
+  if (t === 40) {
       this.computerRight.disable();
-      this.canvas.moveObject(this.rightPaddle, 0, -30);
+      var speed = this.rightPaddle.getVector().getY();
+      this.rightPaddle.getVector().setY(speed < 20 ? speed + 20 : speed);
   }
-  
-  if ( t === 40 && this.rightPaddle.getY() + this.rightPaddle.getHeight() < this.canvas.getHeight()) {
+
+   // right up
+  if (t === 38) {
       this.computerRight.disable();      
-      this.canvas.moveObject(this.rightPaddle, 0, +30);
+      var speed = this.rightPaddle.getVector().getY();
+      this.rightPaddle.getVector().setY(speed > -20 ? speed - 20 : speed);
   }
 
 };
