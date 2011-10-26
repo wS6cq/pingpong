@@ -84,7 +84,7 @@ Rectangle.prototype = new Shape();
 Rectangle.prototype.constructor = Rectangle;   
 
 function Rectangle(x, y){ 
-    Shape.prototype.constructor.call(this);
+    Shape.prototype.constructor.call(this, x, y);
 };
 
 Rectangle.prototype.draw = function (context) {
@@ -104,8 +104,8 @@ Circle.prototype = new Shape();
 Circle.prototype.constructor = Circle;   
 
 function Circle(x, y){ 
-    Shape.prototype.constructor.call(this);
-} 
+    Shape.prototype.constructor.call(this, x, y);
+};
 
 Circle.prototype.draw = function (context) {
     context.fillStyle = "rgb(250,250,250)";
@@ -120,8 +120,6 @@ Circle.prototype.clear = function (context) {
     context.clearRect (this.getX(), this.getY(), this.getWidth(), this.getHeight());
 };
  
-
-
 /***************************************************
  * Prototype CanvasManager
  ***************************************************/
@@ -179,12 +177,12 @@ CanvasManager.prototype.registerObjects = function (objects) {
         this.matrix = new Matrix(objects.length,objects.length);
     }
     this.objects = objects;
-}
+};
 
 CanvasManager.prototype.registerObject = function (object) {
     this.objects.push(object);
     this.matrix = new Matrix(this.objects.length,this.objects.length);
-}
+};
 
 CanvasManager.prototype.clearRectangle = function (x,y,h,w) {
     this.getContext().fillStyle = "rgb(250,250,250)";
@@ -192,12 +190,9 @@ CanvasManager.prototype.clearRectangle = function (x,y,h,w) {
 };
 
 CanvasManager.prototype.detectCollision = function () {
-    //console.log(this.objects);
-    //console.log(this.objects);
     for (var i = 0; i < this.objects.length; i++) {
         for (var j = 0; j < this.objects.length; j++) {
             if (i !== j) {
-            //console.log(o);
             var o1 = this.objects[i];
             var o2 = this.objects[j];
        
@@ -217,7 +212,6 @@ CanvasManager.prototype.detectCollision = function () {
                }
                o1.draw(this.getContext());
                o2.draw(this.getContext());
-               //this.matrix.toString();
                
             } else {
                this.matrix.set(i, j, 0);
@@ -228,8 +222,7 @@ CanvasManager.prototype.detectCollision = function () {
             }
         }
     }
-}
-
+};
 
 /***************************************************
  * Prototype Vector
@@ -262,7 +255,7 @@ CanvasManager.prototype.detectCollision = function () {
      instance.setX(instance.getX() <= 0 ? instance.getX() - min : instance.getX() + min);
      instance.setY(instance.getY() <= 0 ? instance.getY() - min : instance.getY() + min);
      return instance;
- }
+ };
  
  /***************************************************
  * Prototype Score
@@ -354,7 +347,7 @@ function Computer (balls, handle, canvas) {
     this.acitve = false;
     this.balls = balls;
     this.canvas = canvas;
-}
+};
 
 Computer.prototype.getRelevantObject = function() {
     var result = this.balls[0];
@@ -377,7 +370,7 @@ Computer.prototype.act = function () {
             this.canvas.moveObject(this.handle, 0, 7);
         }    
     }
-}
+};
 
 Computer.prototype.disable = function () {
     this.acitve = true;
