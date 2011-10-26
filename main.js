@@ -25,10 +25,10 @@ function onLoad() {
     segment = segment > 100 ? 100 : segment; 
     
     app = new Application(document.getElementById('canvas'),segment);
-    setInterval(iteration,10);
+    setInterval(iteration,20);
     
     document.onkeydown = keyDown;
-    document.onkeyup = keyUp;     
+    document.onkeyup = keyUp;
 }
 
 function iteration() {
@@ -49,7 +49,7 @@ function keyUp(e){
 
 function Application(canvas, balls) {
     this.bootstrap(canvas, balls);
-    this.version = "0.3";
+    this.version = "0.4";
 }
 
 Application.prototype.bootstrap = function (canvas, balls) {
@@ -73,17 +73,16 @@ Application.prototype.bootstrap = function (canvas, balls) {
 
 
     this.canvas.setCanvas(canvas);
-    this.leftPaddle.setX(20);
-    this.leftPaddle.setY(20);
+    this.leftPaddle.setLocation(new Vector(20, 20));
     this.leftPaddle.setHeight(70);
     this.leftPaddle.setWidth(10);
-    
-    this.rightPaddle.setX(this.canvas.getWidth()-40);
-    this.rightPaddle.setY(20);
+
+    this.rightPaddle.setLocation(new Vector(this.canvas.getWidth()-40, 20));
     this.rightPaddle.setHeight(70);
     this.rightPaddle.setWidth(10);  
 
     this.spawnBalls();
+
       
     
 };
@@ -101,7 +100,7 @@ Application.prototype.populate = function (balls) {
 Application.prototype.iterate = function () {
     this.iter++;
     this.animate();
-    if (this.iter % 2 === 0) {
+    if (this.iter) {
         forEach(this.computers, function(item){item.act()});
     }
 
@@ -113,36 +112,36 @@ Application.prototype.animate = function() {
     for (var i =0; i<this.balls.length; i++) {
         this.canvas.moveByVector(this.balls[i]);
     
-        if (this.balls[i].getY() > this.canvas.getHeight() - this.balls[i].getHeight() || this.balls[i].getY() < 0){
-            this.balls[i].getVector().setY(this.balls[i].getVector().getY()*-1);
+        if (this.balls[i].getLocation().getY() > this.canvas.getHeight() - this.balls[i].getHeight() || this.balls[i].getLocation().getY() < 0){
+            this.balls[i].getVelocity().setY(this.balls[i].getVelocity().getY()*-1);
         }
 
-        if (this.balls[i].getX() > this.canvas.getWidth()){
+        if (this.balls[i].getLocation().getX() > this.canvas.getWidth()){
             this.score.incA();
             this.spawnBall(this.balls[i]);
         }   
 
-        if (this.balls[i].getX() < -20){
+        if (this.balls[i].getLocation().getX() < -20){
             this.score.incB();
             this.spawnBall(this.balls[i]);     
-        }   
+        }       
     }  
 
    if (this.computerLeft.acitve === false) {
-       var speed = this.leftPaddle.getVector().getY();
+       var speed = this.leftPaddle.getVelocity().getY();
        var step = 3;
-       if (this.leftPaddle.getY() + this.leftPaddle.getHeight() >= this.canvas.getHeight()&& speed > 0) { speed = 0; }
-       if (this.leftPaddle.getY() <= 0 && speed < 0) { speed = 0; }
-       this.leftPaddle.getVector().setY(Math.abs(speed) > step ? speed > 0 ? speed-step : speed+step : 0);
+       if (this.leftPaddle.getLocation().getY() + this.leftPaddle.getHeight() >= this.canvas.getHeight()&& speed > 0) { speed = 0; }
+       if (this.leftPaddle.getLocation().getY() <= 0 && speed < 0) { speed = 0; }
+       this.leftPaddle.getVelocity().setY(Math.abs(speed) > step ? speed > 0 ? speed-step : speed+step : 0);
        this.canvas.moveByVector(this.leftPaddle);
    }
 
     if (this.computerRight.acitve === false) {
-        var speed = this.rightPaddle.getVector().getY();
+        var speed = this.rightPaddle.getVelocity().getY();
         var step = 3;
-        if (this.rightPaddle.getY() + this.rightPaddle.getHeight() >= this.canvas.getHeight()&& speed > 0) { speed = 0; }
-        if (this.rightPaddle.getY() <= 0 && speed < 0) { speed = 0; }
-        this.rightPaddle.getVector().setY(Math.abs(speed) > step ? speed > 0 ? speed-step : speed+step : 0);
+        if (this.rightPaddle.getLocation().getY() + this.rightPaddle.getHeight() >= this.canvas.getHeight()&& speed > 0) { speed = 0; }
+        if (this.rightPaddle.getLocation().getY() <= 0 && speed < 0) { speed = 0; }
+        this.rightPaddle.getVelocity().setY(Math.abs(speed) > step ? speed > 0 ? speed-step : speed+step : 0);
         this.canvas.moveByVector(this.rightPaddle);
     }
 
@@ -172,11 +171,11 @@ Application.prototype.spawnBalls = function() {
 };
 
 Application.prototype.spawnBall = function(ball) {
-    ball.setX(this.canvas.getWidth()/2);
-    ball.setY(this.canvas.getHeight()/2);
+    ball.getLocation().setX(this.canvas.getWidth()/2);
+    ball.getLocation().setY(Math.random()*(this.canvas.getHeight()-ball.getHeight()));
     ball.setHeight(16);
     ball.setWidth(16);
-    ball.setVector(Vector.getRandom(2,2));
+    ball.setVelocity(Vector.getRandom(2,4));
 };
 
 Application.prototype.keyDown = function(event) {
@@ -191,29 +190,29 @@ Application.prototype.keyDown = function(event) {
   // right up
   if (t === 87) {
       this.computerLeft.disable();
-      var speed = this.leftPaddle.getVector().getY();
-      this.leftPaddle.getVector().setY(speed > -20 ? speed - 20 : speed);
+      var speed = this.leftPaddle.getVelocity().getY();
+      this.leftPaddle.getVelocity().setY(speed > -20 ? speed - 20 : speed);
   }
 
   // left down
   if (t === 83) {
       this.computerLeft.disable();
-      var speed = this.leftPaddle.getVector().getY();
-      this.leftPaddle.getVector().setY(speed < 20 ? speed + 20 : speed);
+      var speed = this.leftPaddle.getVelocity().getY();
+      this.leftPaddle.getVelocity().setY(speed < 20 ? speed + 20 : speed);
   }  
 
   // right down
   if (t === 40) {
       this.computerRight.disable();
-      var speed = this.rightPaddle.getVector().getY();
-      this.rightPaddle.getVector().setY(speed < 20 ? speed + 20 : speed);
+      var speed = this.rightPaddle.getVelocity().getY();
+      this.rightPaddle.getVelocity().setY(speed < 20 ? speed + 20 : speed);
   }
 
    // right up
   if (t === 38) {
       this.computerRight.disable();      
-      var speed = this.rightPaddle.getVector().getY();
-      this.rightPaddle.getVector().setY(speed > -20 ? speed - 20 : speed);
+      var speed = this.rightPaddle.getVelocity().getY();
+      this.rightPaddle.getVelocity().setY(speed > -20 ? speed - 20 : speed);
   }
 
 };

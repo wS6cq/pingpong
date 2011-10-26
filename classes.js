@@ -26,34 +26,28 @@
      this.y = y;
      this.width = 50;
      this.height = 50;
-     this.vector = new Vector(0, 0);
+     this.velocity = new Vector(0, 0);
+     this.location = new Vector(x, y);
  };
  
- Shape.prototype.getVector = function () {
-     return this.vector;
+ Shape.prototype.getVelocity = function () {
+     return this.velocity;
  };
  
- Shape.prototype.setVector = function (vector) {
-     this.vector = vector;
- };
- 
- Shape.prototype.setX = function (x) {
-     this.x = x;
- };
- 
- Shape.prototype.setY = function (y) {
-     this.y = y;
- };
- 
- Shape.prototype.getX = function () {
-     return this.x;
- }; 
- 
- Shape.prototype.getY = function () {
-     return this.y;
+ Shape.prototype.setVelocity = function (vector) {
+     this.velocity = vector;
  };
 
- 
+Shape.prototype.getLocation = function () {
+    return this.location;
+};
+
+
+Shape.prototype.setLocation = function (location) {
+    this.location = location;
+};
+
+
  Shape.prototype.setWidth = function (width) {
      this.width = width;
  };
@@ -71,9 +65,13 @@
  };
  
  Shape.prototype.move = function (x, y) {
-     this.x += x;
-     this.y += y;
+     this.location.x += x;
+     this.location.y += y;
  };
+
+Shape.prototype.getMass = function () {
+    return this.location.x * this.location.y;
+};
 
 
 /***************************************************
@@ -89,11 +87,11 @@ function Rectangle(x, y){
 
 Rectangle.prototype.draw = function (context) {
     context.fillStyle = "rgb(250,250,250)";
-    context.fillRect (this.getX(), this.getY(), this.getWidth(), this.getHeight());
+    context.fillRect (this.getLocation().getX(), this.getLocation().getY(), this.getWidth(), this.getHeight());
 };
 
 Rectangle.prototype.clear = function (context) {
-    context.clearRect(this.getX(), this.getY(), this.getWidth(),this.getHeight());
+    context.clearRect(this.getLocation().getX(), this.getLocation().getY(), this.getWidth(),this.getHeight());
 };
 
 /***************************************************
@@ -110,16 +108,30 @@ function Circle(x, y){
 Circle.prototype.draw = function (context) {
     context.fillStyle = "rgb(250,250,250)";
     context.beginPath();
-    context.arc(this.getX()+this.getWidth()/2,this.getY()+this.getHeight()/2,this.getWidth()/2,0,Math.PI*2,true);
+    // context.arc(this.getLocation().getX()+this.getRadius(),this.getLocation().getY()+this.getRadius(),this.getRadius(),0,Math.PI*2,true);
+    context.arc(this.getLocation().getX()+this.getWidth()/2,this.getLocation().getY()+this.getHeight()/2,this.getWidth()/2,0,Math.PI*2,true);
     context.closePath();    
     context.fill();
  
 };
+
+Circle.prototype.getRadius = function () {
+    return this.getWidth()/2;
+}
  
 Circle.prototype.clear = function (context) {
-    context.clearRect (this.getX(), this.getY(), this.getWidth(), this.getHeight());
+    context.clearRect (this.getLocation().getX()-1, this.getLocation().getY()-1, this.getWidth()+2, this.getHeight()+2);
 };
- 
+
+Shape.prototype.setCenter = function (center) {
+    this.location = center.sub(this.getRadius());
+};
+
+Shape.prototype.getCenter = function () {
+    return Vector.add(this.location, this.getRadius());
+};
+
+
 /***************************************************
  * Prototype CanvasManager
  ***************************************************/
@@ -148,7 +160,7 @@ CanvasManager.prototype.moveObject = function (o, x, y) {
 };
 
 CanvasManager.prototype.moveByVector = function (o) {     
-  this.moveObject(o, o.getVector().getX(), o.getVector().getY());
+  this.moveObject(o, o.getVelocity().getX(), o.getVelocity().getY());
 };
 
 CanvasManager.prototype.getWidth = function () {
@@ -191,23 +203,31 @@ CanvasManager.prototype.detectCollision = function () {
             var o1 = this.objects[i];
             var o2 = this.objects[j];
        
-            if (  (o1.getX() + o1.getWidth() > o2.getX() 
-                && o1.getX() < o2.getX() + o2.getWidth() 
-                && o1.getY() + o1.getHeight() > o2.getY()
-                && o1.getY() < o2.getY() + o2.getHeight() )
+            if (  (o1.getLocation().getX() + o1.getWidth() > o2.getLocation().getX()
+                && o1.getLocation().getX() < o2.getLocation().getX() + o2.getWidth()
+                && o1.getLocation().getY() + o1.getHeight() > o2.getLocation().getY()
+                && o1.getLocation().getY() < o2.getLocation().getY() + o2.getHeight() )
                 
             ){
-               if (this.matrix.get(i, j) === 0 && this.matrix.get(j, i) === 0  ){
-                   o1.getVector().setX(o1.getVector().getX()*-1);
-                   o2.getVector().setX(o2.getVector().getX()*-1);
-                   //o1.getVector().setY(o1.getVector().getY()*-1);
-                   //o2.getVector().setY(o2.getVector().getY()*-1);                   
+
+              if (this.matrix.get(i, j) === 0 && this.matrix.get(j, i) === 0  ){
+                 //this.resolveCollision(o1, o2);
+                 //if ( !(o1 instanceof Circle) || !(o2 instanceof Circle) ) {
+
+                   if (sig(o1.getVelocity().getX()) !== sig(o2.getVelocity().getX())) {
+                       o1.getVelocity().setX(o1.getVelocity().getX()*-1);
+                       o2.getVelocity().setX(o2.getVelocity().getX()*-1);
+                   } else {
+                       o1.getVelocity().setY(o1.getVelocity().getY()*-1);
+                       o2.getVelocity().setY(o2.getVelocity().getY()*-1);
+                   }
+                  
                    this.matrix.set(i, j, 1);
                    this.matrix.set(j, i, 1);
-               }
-               o1.draw(this.getContext());
-               o2.draw(this.getContext());
-               
+                   o1.draw(this.getContext());
+                   o2.draw(this.getContext());
+                 }
+      
             } else {
                this.matrix.set(i, j, 0);
                
@@ -217,6 +237,31 @@ CanvasManager.prototype.detectCollision = function () {
             }
         }
     }
+};
+
+CanvasManager.prototype.resolveCollision = function(o1, o2) {
+
+    if ( o1 instanceof Circle && o2 instanceof Circle ){
+        var l1 = o1.getCenter();
+        var l2 = o2.getCenter();
+        var delta = Vector.sub(l1, l2);
+        var d = delta.getLength();
+        var mtd =  Vector.multiply(delta, (( o1.getRadius() + o2.getRadius())-d)/d);
+        var im1 = 1 / o1.getMass();
+        var im2 = 1 / o2.getMass();
+        o1.getCenter().add(Vector.multiply(mtd, im1/(im1+im2)));
+        o2.getCenter().sub(Vector.multiply(mtd, im2 / (im1 + im2)));
+
+        var v = Vector.sub(o1.getVelocity(), o2.getVelocity());
+        var vn = Vector.dot(v, mtd.normalize());
+        if ( vn <= 0 ) {
+            var i = (-(1 + 1) * vn) / (im1 + im2);
+            var impulse = Vector.multiply(mtd, i);
+            o1.getVelocity().add(impulse.multiply(im1));
+            o2.getVelocity().sub(impulse.multiply(im2));
+        }
+    }
+    
 };
 
 /***************************************************
@@ -243,14 +288,89 @@ CanvasManager.prototype.detectCollision = function () {
  Vector.prototype.getY = function () {
      return this.y;
  };
- 
+
+ Vector.prototype.getLength = function () {
+     return Math.sqrt(this.x * this.x + this.y * this.y);
+ };
+
+Vector.prototype.add = function (v) {
+    if (v instanceof Vector) {
+        this.setX(this.getX()+v.getX());
+        this.setY(this.getY()+v.getY());
+    } else {
+        this.setX(this.getX()+v);
+        this.setY(this.getY()+v);
+    }
+    return this;
+};
+
+Vector.add = function (v1, v2) {
+    var result = new Vector(v1.getX(),  v1.getY());
+    return result.add(v2);
+};
+
+Vector.prototype.sub = function (v) {
+    if (v instanceof Vector) {
+        this.setX(this.getX()-v.getX());
+        this.setY(this.getY()-v.getY());
+    } else {
+        this.setX(this.getX()-v);
+        this.setY(this.getY()-v);
+    }
+    return this;
+};
+
+Vector.sub = function (v1, v2) {
+    var result = new Vector(v1.getX(),  v1.getY());
+    return result.sub(v2);
+};
+
+Vector.prototype.multiply = function (v) {
+    if (v instanceof Vector) {
+        this.setX(this.getX() * v.getX());
+        this.setY(this.getY() * v.getY());
+    } else {
+        this.setX(this.getX()*v);
+        this.setY(this.getY()*v);
+    }
+    return this;
+};
+
+Vector.multiply = function (v1, v2) {
+    var result = new Vector(v1.getX(), v1.getY());
+    return result.multiply(v2);
+};
+
+Vector.prototype.dot = function (v) {
+    return this.getX()*v.getX() + this.getY()*v.getY();
+};
+
+Vector.dot = function (v1, v2) {
+    var result = new Vector(v1.getX(), v1.getY());
+    return result.dot(v2);
+};
+
+Vector.prototype.distance = function (v) {
+    return this.sub(v).getLength();
+};
+
+Vector.prototype.normalize = function () {
+    var length = this.getLength();
+    this.setX(this.getX()/length);
+    this.setY(this.getY()/length);
+    return this;
+}
+
  Vector.getRandom = function (min, max) {
-     //max -= min;
      var instance = new Vector(Math.round(Math.random()*max*2)-max,Math.round(Math.random()*max*2)-max);
      instance.setX(instance.getX() <= 0 ? instance.getX() - min : instance.getX() + min);
      instance.setY(instance.getY() <= 0 ? instance.getY() - min : instance.getY() + min);
      return instance;
  };
+
+Vector.prototype.toString = function () {
+    return "x: " + this.getX() + ", y: " + this.getY();
+}
  
  /***************************************************
  * Prototype Score
@@ -347,21 +467,27 @@ function Computer (balls, handle, canvas) {
 Computer.prototype.getRelevantObject = function() {
     var result = this.balls[0];
     for (var i=0; i<this.balls.length; i++) {
-        var item = this.balls[i];
-        if ( Math.abs(item.getX() - this.handle.getX()) <  Math.abs(result.getX() - this.handle.getX())){
-            result = item;
+        var ball = this.balls[i];
+        if ( Math.abs(ball.getLocation().getX() - this.handle.getLocation().getX()) <  Math.abs(result.getLocation().getX() - this.handle.getLocation().getX())
+            && ( ( ball.getVelocity().getX() < 0 && ball.getLocation().getX() > this.handle.getLocation().getX() ) ||
+                 ( ball.getVelocity().getX() > 0 && ball.getLocation().getX() < this.handle.getLocation().getX() )
+            )){
+            result = ball;
         }
-    }  
+    }
     return result;
 };
 
 Computer.prototype.act = function () {
+
     if (this.acitve === true) {
+
         var ball = this.getRelevantObject();
-        if (ball.getY()+ball.getHeight()/2 < this.handle.getY()+this.handle.getHeight()/2){
+        
+        if (ball.getLocation().getY()+ball.getHeight()/2 < this.handle.getLocation().getY()+this.handle.getHeight()/2){
             this.canvas.moveObject(this.handle, 0, -7);
         }
-        if (ball.getY()+ball.getHeight()/2 > this.handle.getY()+this.handle.getHeight()/2){
+        if (ball.getLocation().getY()+ball.getHeight()/2 > this.handle.getLocation().getY()+this.handle.getHeight()/2){
             this.canvas.moveObject(this.handle, 0, 7);
         }    
     }
@@ -385,4 +511,10 @@ function forEach(array, action) {
     }
 };
 
+function sig(number) {
+    var result = 0;
+    if (number > 0){ result = 1; }
+    if (number < 0){ result = -1; }
+    return result;
+};
 
