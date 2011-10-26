@@ -1,4 +1,4 @@
-This is an implementation of the famous poing pong game in JavaScript using HTML Canvas. I implemented this in order to play around with the HTML Canvas. Comments and improvements are welcome!
+This is an implementation of the famous "ping pong" game in JavaScript using HTML Canvas. I did not make use of any JavaScript-Framework (e.g. jQuery) thus it’s all plain OO-JavaScript. I implemented this in order to play around with the HTML Canvas. Comments and improvements are welcome!
 
 The good thing is, that you only need to open index.html in an up to date browser.
 
