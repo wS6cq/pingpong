@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, Phillip Kroll <c@phillipkroll.de>
+ * Copyright (c) 2011, Phillip Kroll <contact@phillipkroll.de>
  * 
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -49,7 +49,7 @@ function keyUp(e){
 
 function Application(canvas, balls) {
     this.bootstrap(canvas, balls);
-    this.version = "0.4";
+    this.version = "0.5";
 }
 
 Application.prototype.bootstrap = function (canvas, balls) {
@@ -59,7 +59,8 @@ Application.prototype.bootstrap = function (canvas, balls) {
     this.score = new Score();
     this.balls = new Array();
     this.computers = new Array(); 
-    this.iter = 0;   
+    this.iter = 0;
+    this.humanVelocity = 10;
    
    
     this.canvas.registerObjects(new Array(this.leftPaddle, this.rightPaddle));
@@ -128,20 +129,14 @@ Application.prototype.animate = function() {
     }  
 
    if (this.computerLeft.acitve === false) {
-       var speed = this.leftPaddle.getVelocity().getY();
-       var step = 3;
-       if (this.leftPaddle.getLocation().getY() + this.leftPaddle.getHeight() >= this.canvas.getHeight()&& speed > 0) { speed = 0; }
-       if (this.leftPaddle.getLocation().getY() <= 0 && speed < 0) { speed = 0; }
-       this.leftPaddle.getVelocity().setY(Math.abs(speed) > step ? speed > 0 ? speed-step : speed+step : 0);
+       if (this.leftPaddle.getLocation().getY() + this.leftPaddle.getHeight() >= this.canvas.getHeight() && this.leftPaddle.getVelocity().getY()>0) { this.leftPaddle.stop() }
+       if (this.leftPaddle.getLocation().getY() <= 0 && this.leftPaddle.getVelocity().getY()<0) { this.leftPaddle.stop() }
        this.canvas.moveByVector(this.leftPaddle);
    }
 
     if (this.computerRight.acitve === false) {
-        var speed = this.rightPaddle.getVelocity().getY();
-        var step = 3;
-        if (this.rightPaddle.getLocation().getY() + this.rightPaddle.getHeight() >= this.canvas.getHeight()&& speed > 0) { speed = 0; }
-        if (this.rightPaddle.getLocation().getY() <= 0 && speed < 0) { speed = 0; }
-        this.rightPaddle.getVelocity().setY(Math.abs(speed) > step ? speed > 0 ? speed-step : speed+step : 0);
+        if (this.rightPaddle.getLocation().getY() + this.rightPaddle.getHeight() >= this.canvas.getHeight() && this.rightPaddle.getVelocity().getY()>0) { this.rightPaddle.stop(); }
+        if (this.rightPaddle.getLocation().getY() <= 0 && this.rightPaddle.getVelocity().getY()<0) { this.rightPaddle.stop() }
         this.canvas.moveByVector(this.rightPaddle);
     }
 
@@ -187,36 +182,62 @@ Application.prototype.keyDown = function(event) {
     t = event.keyCode;
   }
 
-  // right up
+  // left up
   if (t === 87) {
       this.computerLeft.disable();
-      var speed = this.leftPaddle.getVelocity().getY();
-      this.leftPaddle.getVelocity().setY(speed > -20 ? speed - 20 : speed);
+      this.leftPaddle.setVelocity(new Vector(0, -this.humanVelocity));
   }
 
   // left down
   if (t === 83) {
       this.computerLeft.disable();
-      var speed = this.leftPaddle.getVelocity().getY();
-      this.leftPaddle.getVelocity().setY(speed < 20 ? speed + 20 : speed);
-  }  
+      this.leftPaddle.setVelocity(new Vector(0, this.humanVelocity));
+  }
+   // right up
+  if (t === 38) {
+      this.computerRight.disable();      
+      this.rightPaddle.setVelocity(new Vector(0, -this.humanVelocity));
+  }
 
   // right down
   if (t === 40) {
       this.computerRight.disable();
-      var speed = this.rightPaddle.getVelocity().getY();
-      this.rightPaddle.getVelocity().setY(speed < 20 ? speed + 20 : speed);
-  }
-
-   // right up
-  if (t === 38) {
-      this.computerRight.disable();      
-      var speed = this.rightPaddle.getVelocity().getY();
-      this.rightPaddle.getVelocity().setY(speed > -20 ? speed - 20 : speed);
+      this.rightPaddle.setVelocity(new Vector(0, this.humanVelocity));
   }
 
 };
 
 Application.prototype.keyUp = function(event) {
-    
+    if (!event)
+      event = window.event;
+    if (event.which) {
+      t = event.which;
+    } else if (event.keyCode) {
+      t = event.keyCode;
+    }
+
+  // left up
+  if (t === 87) {
+      if (this.leftPaddle.getVelocity().getY()<0)
+      this.leftPaddle.stop();
+  }
+
+  // left down
+  if (t === 83) {
+      if (this.leftPaddle.getVelocity().getY()>0)
+      this.leftPaddle.stop();
+  }
+
+  // left up
+  if (t === 38) {
+      if (this.rightPaddle.getVelocity().getY()<0)
+      this.rightPaddle.stop();
+  }
+
+  // left down
+  if (t === 40) {
+      if (this.rightPaddle.getVelocity().getY()>0)
+      this.rightPaddle.stop();
+  }
+
 };

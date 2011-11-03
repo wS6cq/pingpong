@@ -73,6 +73,10 @@ Shape.prototype.getMass = function () {
     return this.location.x * this.location.y;
 };
 
+Shape.prototype.stop = function () {
+    this.setVelocity(new Vector(0, 0));
+}
+
 
 /***************************************************
  * Prototype Rectangle
