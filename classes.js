@@ -21,13 +21,15 @@
  * Prototype Shape
  ***************************************************/
     
- function Shape(x, y) {
+ function Shape(context, x, y) {
      this.x = x;
      this.y = y;
      this.width = 50;
      this.height = 50;
+     this.context = context;
      this.velocity = new Vector(0, 0);
      this.location = new Vector(x, y);
+     this.id = Math.random()*99999;
  };
  
  Shape.prototype.getVelocity = function () {
@@ -85,17 +87,17 @@ Shape.prototype.stop = function () {
 Rectangle.prototype = new Shape();        
 Rectangle.prototype.constructor = Rectangle;   
 
-function Rectangle(x, y){ 
-    Shape.prototype.constructor.call(this, x, y);
+function Rectangle(context, x, y){
+    Shape.prototype.constructor.call(this, context, x, y);
 };
 
-Rectangle.prototype.draw = function (context) {
-    context.fillStyle = "rgb(250,250,250)";
-    context.fillRect (this.getLocation().getX(), this.getLocation().getY(), this.getWidth(), this.getHeight());
+Rectangle.prototype.draw = function () {
+    this.context.fillStyle = "rgb(250,250,250)";
+    this.context.fillRect (this.getLocation().getX(), this.getLocation().getY(), this.getWidth(), this.getHeight());
 };
 
-Rectangle.prototype.clear = function (context) {
-    context.clearRect(this.getLocation().getX(), this.getLocation().getY(), this.getWidth(),this.getHeight());
+Rectangle.prototype.clear = function () {
+    this.context.clearRect(this.getLocation().getX(), this.getLocation().getY(), this.getWidth(),this.getHeight());
 };
 
 /***************************************************
@@ -105,17 +107,17 @@ Rectangle.prototype.clear = function (context) {
 Circle.prototype = new Shape();        
 Circle.prototype.constructor = Circle;   
 
-function Circle(x, y){ 
-    Shape.prototype.constructor.call(this, x, y);
+function Circle(context, x, y){
+    Shape.prototype.constructor.call(this, context, x, y);
 };
 
-Circle.prototype.draw = function (context) {
-    context.fillStyle = "rgb(250,250,250)";
-    context.beginPath();
+Circle.prototype.draw = function () {
+    this.context.fillStyle = "rgb(250,250,250)";
+    this.context.beginPath();
     // context.arc(this.getLocation().getX()+this.getRadius(),this.getLocation().getY()+this.getRadius(),this.getRadius(),0,Math.PI*2,true);
-    context.arc(this.getLocation().getX()+this.getWidth()/2,this.getLocation().getY()+this.getHeight()/2,this.getWidth()/2,0,Math.PI*2,true);
-    context.closePath();    
-    context.fill();
+    this.context.arc(this.getLocation().getX()+this.getWidth()/2,this.getLocation().getY()+this.getHeight()/2,this.getWidth()/2,0,Math.PI*2,true);
+    this.context.closePath();
+    this.context.fill();
  
 };
 
@@ -123,8 +125,8 @@ Circle.prototype.getRadius = function () {
     return this.getWidth()/2;
 }
  
-Circle.prototype.clear = function (context) {
-    context.clearRect (this.getLocation().getX()-1, this.getLocation().getY()-1, this.getWidth()+2, this.getHeight()+2);
+Circle.prototype.clear = function () {
+    this.context.clearRect (this.getLocation().getX()-1, this.getLocation().getY()-1, this.getWidth()+2, this.getHeight()+2);
 };
 
 Shape.prototype.setCenter = function (center) {

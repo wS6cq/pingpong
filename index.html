@@ -1,17 +1,20 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <title>JavaScript Ping Pong</title>
+    <title>Play Ping Pong</title>
     
     <script src="classes.js"></script>
     <script src="main.js"></script>
   </head>
-  <body onload="onLoad();" style="margin:50px 0px; padding:0px;	text-align:center;">
+  <body onload="start();" style="margin:50px 0px; padding:0px;	text-align:center;">
         <canvas id="canvas" width="850" height="450" onclick="" style="background: #111"></canvas>
   </body>
 
   <div style="font-size: 11px; color: #555;">
-    <p >left player keys: w (up), s (down), right player keys: arrow up (up), arrow down (down), add "#x" to url (x = number of balls)</p>
-    <p><a href="https://github.com/phillipkroll/pingpong">get source</a></p>
+    <p >Play yourself: left player keys: w (up), s (down), right player keys: arrow up (up), arrow down (down)</p>
+    <p>
+        <a href="#" onclick="app.add()">yeah more balls</a> -
+        <a href="#" onclick="app.remove()">uhh less please</a> -
+        <a href="https://github.com/phillipkroll/pingpong">get source</a></p>
   </div>
 </html>

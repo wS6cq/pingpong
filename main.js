@@ -18,44 +18,31 @@
  ******************************************************************************/
 
 var app = null;
- 
-function onLoad() {
+
+function start() {
     var segment = unescape(document.location.hash.substring(1));
     segment = segment == "" ? 1 : segment;
-    segment = segment > 100 ? 100 : segment; 
-    
+    segment = segment > 100 ? 100 : segment;
     app = new Application(document.getElementById('canvas'),segment);
-    setInterval(iteration,20);
-    
-    document.onkeydown = keyDown;
-    document.onkeyup = keyUp;
+    setInterval(function(){app.iterate();},20);
+    document.onkeydown = function(e){app.keyDown(e);};
+    document.onkeyup = function(e){app.keyUp(e);};
 }
 
-function iteration() {
-    app.iterate();
-}
-
-function keyDown(e){
-    app.keyDown(e);
-}
-
-function keyUp(e){
-    app.keyUp(e);
-}
- 
  /***************************************************
  * Prototype Application
  ***************************************************/
 
 function Application(canvas, balls) {
     this.bootstrap(canvas, balls);
-    this.version = "0.5";
+    this.version = "0.6";
 }
 
 Application.prototype.bootstrap = function (canvas, balls) {
     this.canvas = new CanvasManager();
-    this.leftPaddle = new Rectangle();
-    this.rightPaddle = new Rectangle();
+    this.canvas.setCanvas(canvas);
+    this.leftPaddle = new Rectangle(this.canvas.getContext());
+    this.rightPaddle = new Rectangle(this.canvas.getContext());
     this.score = new Score();
     this.balls = new Array();
     this.computers = new Array(); 
@@ -73,7 +60,7 @@ Application.prototype.bootstrap = function (canvas, balls) {
     this.computers.push(this.computerRight);
 
 
-    this.canvas.setCanvas(canvas);
+    
     this.leftPaddle.setLocation(new Vector(20, 20));
     this.leftPaddle.setHeight(70);
     this.leftPaddle.setWidth(10);
@@ -89,14 +76,25 @@ Application.prototype.bootstrap = function (canvas, balls) {
 };
 
 Application.prototype.populate = function (balls) {
-    
     for (var i =0; i<balls; i++) {
-      this.balls.push(new Circle());
-    }  
-    for (var j =0; j<this.balls.length; j++) {
-         this.canvas.registerObject(this.balls[j]);
+        this.add();
     }
 };
+
+Application.prototype.add = function () {
+    var ball = new Circle(this.canvas.getContext());
+    this.balls.push(ball);
+    this.canvas.registerObject(ball);
+    this.spawnBall(ball);
+};
+
+Application.prototype.remove = function () {
+   if (this.balls.length > 1){
+       this.canvas.objects.splice(this.canvas.objects.indexOf(this.balls[0]), 1);
+       this.balls.shift().clear();
+   }
+};
+
 
 Application.prototype.iterate = function () {
     this.iter++;
