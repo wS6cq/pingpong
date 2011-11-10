@@ -88,6 +88,8 @@ Application.prototype.add = function () {
     this.spawnBall(ball);
 };
 
+
+
 Application.prototype.remove = function () {
    if (this.balls.length > 1){
        this.canvas.objects.splice(this.canvas.objects.indexOf(this.balls[0]), 1);
@@ -166,8 +168,9 @@ Application.prototype.spawnBalls = function() {
 Application.prototype.spawnBall = function(ball) {
     ball.getLocation().setX(this.canvas.getWidth()/2);
     ball.getLocation().setY(Math.random()*(this.canvas.getHeight()-ball.getHeight()));
-    ball.setHeight(16);
-    ball.setWidth(16);
+    var r = Math.random()*10;
+    ball.setHeight(12+r);
+    ball.setWidth(12+r);
     ball.setVelocity(Vector.getRandom(2,4));
 };
 

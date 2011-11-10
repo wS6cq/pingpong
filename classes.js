@@ -29,7 +29,7 @@
      this.context = context;
      this.velocity = new Vector(0, 0);
      this.location = new Vector(x, y);
-     this.id = Math.random()*99999;
+     this.style =  "rgb(220,240,220)";
  };
  
  Shape.prototype.getVelocity = function () {
@@ -92,12 +92,12 @@ function Rectangle(context, x, y){
 };
 
 Rectangle.prototype.draw = function () {
-    this.context.fillStyle = "rgb(250,250,250)";
+    this.context.fillStyle = this.style;
     this.context.fillRect (this.getLocation().getX(), this.getLocation().getY(), this.getWidth(), this.getHeight());
 };
 
 Rectangle.prototype.clear = function () {
-    this.context.clearRect(this.getLocation().getX(), this.getLocation().getY(), this.getWidth(),this.getHeight());
+    this.context.clearRect(this.getLocation().getX()-1, this.getLocation().getY()-1, this.getWidth()+2,this.getHeight()+2);
 };
 
 /***************************************************
@@ -112,7 +112,7 @@ function Circle(context, x, y){
 };
 
 Circle.prototype.draw = function () {
-    this.context.fillStyle = "rgb(250,250,250)";
+    this.context.fillStyle = this.style;
     this.context.beginPath();
     // context.arc(this.getLocation().getX()+this.getRadius(),this.getLocation().getY()+this.getRadius(),this.getRadius(),0,Math.PI*2,true);
     this.context.arc(this.getLocation().getX()+this.getWidth()/2,this.getLocation().getY()+this.getHeight()/2,this.getWidth()/2,0,Math.PI*2,true);
@@ -217,22 +217,12 @@ CanvasManager.prototype.detectCollision = function () {
             ){
 
               if (this.matrix.get(i, j) === 0 && this.matrix.get(j, i) === 0  ){
-                 //this.resolveCollision(o1, o2);
-                 //if ( !(o1 instanceof Circle) || !(o2 instanceof Circle) ) {
-
-                   if (sig(o1.getVelocity().getX()) !== sig(o2.getVelocity().getX())) {
-                       o1.getVelocity().setX(o1.getVelocity().getX()*-1);
-                       o2.getVelocity().setX(o2.getVelocity().getX()*-1);
-                   } else {
-                       o1.getVelocity().setY(o1.getVelocity().getY()*-1);
-                       o2.getVelocity().setY(o2.getVelocity().getY()*-1);
-                   }
-                  
-                   this.matrix.set(i, j, 1);
-                   this.matrix.set(j, i, 1);
-                   o1.draw(this.getContext());
-                   o2.draw(this.getContext());
-                 }
+               this.resolveCollision(o1, o2);
+               this.matrix.set(i, j, 1);
+               this.matrix.set(j, i, 1);
+               o1.draw(this.getContext());
+               o2.draw(this.getContext());
+             }
       
             } else {
                this.matrix.set(i, j, 0);
@@ -247,7 +237,32 @@ CanvasManager.prototype.detectCollision = function () {
 
 CanvasManager.prototype.resolveCollision = function(o1, o2) {
 
-    if ( o1 instanceof Circle && o2 instanceof Circle ){
+   // case 1
+   if (sig(o1.getVelocity().getX()) !== sig(o2.getVelocity().getX()) ) {
+       o1.getVelocity().setX(o1.getVelocity().getX()*-1);
+       o2.getVelocity().setX(o2.getVelocity().getX()*-1); }
+
+    // case 2
+    if (sig(o1.getVelocity().getX()) === sig(o2.getVelocity().getX()) &&
+        sig(o1.getVelocity().getY()) !== sig(o2.getVelocity().getY()) ) {
+       o1.getVelocity().setY(o1.getVelocity().getY()*-1);
+       o2.getVelocity().setY(o2.getVelocity().getY()*-1);
+    }
+
+    // case 3
+    if (sig(o1.getVelocity().getX()) === sig(o2.getVelocity().getX()) &&
+        sig(o1.getVelocity().getY()) === sig(o2.getVelocity().getY()) ) {
+        if ( o1.getLocation().getX() >= o2.getLocation().getX() ){
+           o1.getVelocity().setY(o1.getVelocity().getY()+sig(o1.getVelocity().getY()));
+           o2.getVelocity().setY(o2.getVelocity().getY()*-1);
+        } else {
+           o2.getVelocity().setY(o2.getVelocity().getY()+sig(o2.getVelocity().getY()));
+           o1.getVelocity().setY(o1.getVelocity().getY()*-1);
+        }
+
+    }
+
+    if ( o1 instanceof Circle && o2 instanceof Circle && false ){
         var l1 = o1.getCenter();
         var l2 = o2.getCenter();
         var delta = Vector.sub(l1, l2);
